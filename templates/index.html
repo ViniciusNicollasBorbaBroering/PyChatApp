@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatApp</title>
+
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; }
+        #chat_box { border: 1px solid #ccc; height: 300px; width: 300px; overflow-y: scroll; background: white; padding: 10px; border-radius: 5px;}
+        #message_input { width: 220px; padding: 5px; margin-top: 10px; }
+        button { padding: 5px 10px; cursor: pointer; }
+    </style>
+
+    <!-- Socket.IO Client -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+</head>
+<body>
+
+    <!-- Chat UI -->
+    <h1>ChatApp</h1>
+    <ul id="chat_box"></ul>
+    <input id="message_input" type="text" placeholder="Type a message..." autocomplete="off">
+    <button onclick="sendMessage()">Send</button>
+
+    <!-- Client-Side Logic -->
+    <script>
+        // Connect to server
+        const socket = io();
+
+        // Get current time
+        function getCurrentTime() {
+            return new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+
+        // Send message
+        function sendMessage() {
+            const inputField = document.getElementById('message_input');
+            const messageText = inputField.value;
+
+            if (messageText.trim() !== "") {
+                const data = {
+                    msg: messageText,
+                    time: getCurrentTime()
+                };
+                socket.emit('chat_message', data);
+                inputField.value = '';
+            }
+        }
+
+        // Receive message & update UI
+        socket.on('server_message', function(data) {
+            const chatBox = document.getElementById('chat_box');
+            const listItem = document.createElement('li');
+
+            // Format
+            listItem.textContent = `[${data.time}] ${data.msg}`;
+            chatBox.appendChild(listItem);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+
+        document.getElementById('message_input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+
+</body>
+</html>

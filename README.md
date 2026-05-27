@@ -1,0 +1,1 @@
+A real-time client-server chat application built with Python, Flask, and SocketIO.
